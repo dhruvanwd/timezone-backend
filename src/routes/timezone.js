@@ -18,17 +18,15 @@ module.exports = (db) => {
         }
     })
 
-
-
     router.put("/", async (req, res) => {
         const { data, tokenDetail } = req.body;
+        const { _id, ...updateInfo } = data;
         await timezoneCol.findOneAndUpdate({
-            _id: ObjectId(tokenDetail['_id']),
+            _id: ObjectId(data[_id]),
         }, {
-            $set: data
+            $set: updateInfo
         })
         res.send({ "message": "timezone updated successfully !" })
-
     })
 
     router.get("/", async (req, res) => {

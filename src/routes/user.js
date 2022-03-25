@@ -2,6 +2,7 @@ const express = require('express');
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
+const { ObjectId } = require("mongodb")
 
 
 
@@ -57,15 +58,38 @@ module.exports = (db) => {
     });
 
 
+    router.delete('/user', async (req, res) => {
+        try {
+            const { _id } = req.query
+            await users.deleteOne({ _id: ObjectId(_id) })
+            res.send({
+                message: "user deleted successfully....!"
+            });
+        } catch (error) {
+            console.warn(error);
+            res.status(400).send({ message: error.message })
+        }
+    })
+
+
+
+
+
     router.get("/users", async (req, res) => {
         try {
             const { tokenDetail } = req.body;
-            const { pageNumber, nPerPage, searchText } = req.query;
+            const { pageNumber, nPerPage, searchText, role } = req.query;
 
-            const cursor = await users.find({
-                managerId: tokenDetail['_id'],
-                name: { $regex: `^${searchText}`, $options: 'i' }
-            }).skip((Number(pageNumber)) * Number(nPerPage)).limit(Number(nPerPage))
+            const filerQuery = {}
+
+            if (tokenDetail.role == 'user') {
+                filerQuery.managerId = tokenDetail['_id'];
+                filerQuery.name = { $regex: `^${searchText}`, $options: 'i' }
+            } else {
+                filerQuery.role = role;
+            }
+
+            const cursor = await users.find(filerQuery).skip((Number(pageNumber)) * Number(nPerPage)).limit(Number(nPerPage))
 
             res.send({
                 "message": "success", data: {
