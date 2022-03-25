@@ -72,6 +72,18 @@ module.exports = (db) => {
     })
 
 
+    router.put("/user", async (req, res) => {
+        const { tokenDetail, data } = req.body;
+        const { _id, ...updateInfo } = data;
+        await users.findOneAndUpdate({
+            _id: ObjectId(_id),
+        }, {
+            $set: updateInfo
+        })
+        res.send({ "message": "user updated successfully !" })
+    })
+
+
 
 
 
